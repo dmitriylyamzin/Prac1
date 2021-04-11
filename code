@@ -1,0 +1,268 @@
+def findInList(key, elem):
+    for i in range (101):
+        if int(key[i])==elem:
+            return i
+
+def validateSRKey(key_string):
+    potential_key = key_string.split(' ')
+    if (len(potential_key)!=101):
+        return 0
+    if (len(set(potential_key))!=101):
+        return 0
+    
+    for i in range(101):
+        try:
+            potential_key[i] = int(potential_key[i])
+        except:
+            return 0
+    potential_key.sort()
+    
+    for i in range (1,101):
+        if potential_key[i]-potential_key[i-1]!=1:
+            return 0    
+    
+    if (potential_key[0]!=1 or potential_key[-1]!=101):
+        return 0
+    
+    return 1
+
+def encryptSR (alphabet, key, text):
+    ciphertext = ""
+    for i in text:
+        if i==" ":
+            ciphertext+=" "
+        else:
+            ciphertext += alphabet[int(key[alphabet.find(i)])-1]
+    print (ciphertext)
+
+def decryptSR(alphabet, key, text):
+    plaintext = ""
+    for i in text:
+        if i==" ":
+            plaintext+=" "
+        else:        
+            plaintext += alphabet[findInList(key, alphabet.find(i)+1)]
+    print (plaintext)    
+
+
+def simpleReplacement(alphabet):
+    text = input("Введите открытый текст или шифртекст: ").lower()
+    validation_flag = 0
+    key_string = input ("Введите ключ (для шифра простой замены он должен состоять из 101 числа от 1 до 101, разделённого пробелами): ")
+    key = []
+    while validation_flag == 0:
+        validation_flag = validateSRKey(key_string)
+        print(validation_flag)
+        if validation_flag == 1:
+            key=key_string.split(' ')
+            break
+        key_string = input("Ключ оказался неверным. Повторите, пожалуйста попытку: ")
+    action_type = input("Выберите операцию, которую вы хотите осуществить, нажав на соответствующую цифру на клавиатуре:\n 1. Зашифрование\n 2. Расшифрование\n")
+    choose_flag = 0
+    while choose_flag == 0:
+        if action_type == "1":
+            encryptSR(alphabet, key, text)
+            choose_flag = 1
+        elif action_type == "2":
+            decryptSR(alphabet, key, text)
+            choose_flag = 1
+        else:
+            action_type = input("Вы должны ввести цифру от 1 до 2 и ничего более:\n 1. Зашифрование\n 2. Расшифрование\n")
+            
+def validateAffineKey(key_string):
+    potential_key = key_string.split(' ')
+    if (len(potential_key)!=2):
+        return 0
+    
+    for i in range(2):
+        try:
+            potential_key[i] = int(potential_key[i])
+        except:
+            return 0
+    if (potential_key[0]<1 or potential_key[0]>100 or potential_key[1]<0 or potential_key[1]>100):
+        return 0
+    
+    return 1
+
+def encryptAffine (alphabet, key, text):
+    a = int (key[0])
+    b = int (key[1])
+    ciphertext = ""
+    for i in text:
+        if i==" ":
+            ciphertext+=" "
+        else:        
+            ciphertext += alphabet[(alphabet.find(i)*a+b)%101]
+    print (ciphertext)    
+    
+def reverse(b, a):
+    x2 = 1
+    x1 = 0
+    y2 = 0
+    y1 = 1
+    x = 0
+    y = 0
+    q = 0
+    r = 0
+    while b!=0:
+        q = a//b
+        r = a%b
+        x = x2 - q*x1
+        y = y2 - q*y1
+        a = b
+        b = r
+        x2 = x1
+        x1 = x
+        y2 = y1
+        y1 = y
+    return y2
+        
+    
+def decryptAffine (alphabet, key, text):
+    a = int (key[0])
+    b = int (key[1])
+    plaintext = ""
+    for i in text:
+        if i==" ":
+            plaintext+=" "
+        else:         
+            plaintext += alphabet[((alphabet.find(i)+101-b)*reverse(a, 101))%101]
+        
+    print (plaintext)      
+    
+def validateAR (key_string):
+    potential_key = key_string.split(' ')
+    if (len(potential_key)!=4):
+        return 0
+    
+    for i in range(4):
+        try:
+            potential_key[i] = int(potential_key[i])
+        except:
+            return 0
+    if (potential_key[0]<1 or potential_key[0]>100 or potential_key[1]<0 or potential_key[1]>100 or potential_key[2]<1 or potential_key[2]>100 or potential_key[3]<0 or potential_key[3]>100):
+        return 0
+    
+    return 1    
+
+def encryptAR (alphabet, key, text):
+    a1 = int (key[0])
+    b1 = int (key[1])
+    a2 = int (key[2])
+    b2 = int (key[3]) 
+    ciphertext = ""
+    counter = 0
+    for i in text:
+        counter += 1
+        if i==" ":
+            ciphertext+=" "
+        else:        
+            if counter == 1: 
+                ciphertext += alphabet[(alphabet.find(i)*a1+b1)%101]
+            elif counter == 2:
+                ciphertext += alphabet[(alphabet.find(i)*a2+b2)%101]
+            elif counter > 2:
+                a = a1 * a2
+                b = b1 + b2   
+                ciphertext += alphabet[(alphabet.find(i)*a+b)%101]
+                a1 = a2
+                b1 = b2
+                a2 = a
+                b2 = b            
+    print (ciphertext)    
+    
+def decryptAR (alphabet, key, text):
+    a1 = int (key[0])
+    b1 = int (key[1])
+    a2 = int (key[2])
+    b2 = int (key[3])    
+    plaintext = ""
+    counter = 0
+    for i in text:
+        counter += 1
+        if i==" ":
+            plaintext+=" "
+        else:         
+            if counter == 1:
+                plaintext += alphabet[((alphabet.find(i)+101-b1)*reverse(a1, 101))%101]
+            elif counter == 2:
+                plaintext += alphabet[((alphabet.find(i)+101-b2)*reverse(a2, 101))%101]
+            elif counter > 2:
+                a = a1 * a2
+                b = b1 + b2
+                plaintext += alphabet[((alphabet.find(i)+101-b)*reverse(a, 101))%101]
+                a1 = a2
+                b1 = b2
+                a2 = a
+                b2 = b
+            
+    print (plaintext)  
+    
+    
+
+def affine(alphabet):
+    text = input("Введите открытый текст или шифртекст: ").lower()
+    validation_flag = 0
+    key_string = input ("Введите ключ (для аффинного шифра он должен состоять из двух чисел от 1 до 100 и от 0 до 100 соответственно, разделённых пробелами): ")
+    key = []
+    while validation_flag == 0:
+        validation_flag = validateAffineKey(key_string)
+        print(validation_flag)
+        if validation_flag == 1:
+            key=key_string.split(' ')
+            break
+        key_string = input("Ключ оказался неверным. Повторите, пожалуйста попытку: ")
+    action_type = input("Выберите операцию, которую вы хотите осуществить, нажав на соответствующую цифру на клавиатуре:\n 1. Зашифрование\n 2. Расшифрование\n")
+    choose_flag = 0
+    while choose_flag == 0:
+        if action_type == "1":
+            encryptAffine(alphabet, key, text)
+            choose_flag = 1
+        elif action_type == "2":
+            decryptAffine(alphabet, key, text)
+            choose_flag = 1
+        else:
+            action_type = input("Вы должны ввести цифру от 1 до 2 и ничего более:\n 1. Зашифрование\n 2. Расшифрование\n")
+            
+def affineRecurrent(alphabet):
+    text = input("Введите открытый текст или шифртекст: ").lower()
+    validation_flag = 0
+    key_string = input ("Введите ключ (для аффинного рекуррентного шифра он должен состоять из четырёх чисел (первое и третье - от 1 до 100, второе и четвёртое - от 0 до 100 соответственно), разделённых пробелами): ")
+    key = []
+    while validation_flag == 0:
+        validation_flag = validateAR(key_string)
+        print(validation_flag)
+        if validation_flag == 1:
+            key=key_string.split(' ')
+            break
+        key_string = input("Ключ оказался неверным. Повторите, пожалуйста попытку: ")
+    action_type = input("Выберите операцию, которую вы хотите осуществить, нажав на соответствующую цифру на клавиатуре:\n 1. Зашифрование\n 2. Расшифрование\n")
+    choose_flag = 0
+    while choose_flag == 0:
+        if action_type == "1":
+            encryptAR(alphabet, key, text)
+            choose_flag = 1
+        elif action_type == "2":
+            decryptAR(alphabet, key, text)
+            choose_flag = 1
+        else:
+            action_type = input("Вы должны ввести цифру от 1 до 2 и ничего более:\n 1. Зашифрование\n 2. Расшифрование\n")
+    
+    
+    
+
+alphabet= "`~!@\"№#$;%:^?&*()_-+{}[]\|/'.,<>1234567890abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+cipher_type = input("Выберите вид шифра, которым вы хотите воспользоваться, нажав на соответствующую цифру на клавиатуре:\n 1. Шифр простой замены\n 2. Аффинный шифр\n 3. Аффинный рекуррентный шифр\n")
+choose_flag = 0
+while choose_flag == 0:
+    if cipher_type == "1":
+        simpleReplacement(alphabet)
+        choose_flag = 1
+    elif cipher_type == "2":
+        affine(alphabet)
+        choose_flag = 1
+    elif cipher_type == "3":
+        affineRecurrent(alphabet)
+        choose_flag = 1
+    else:
+        cipher_type = input("Вы должны ввести цифру от 1 до 3 и ничего более:\n 1. Шифр простой замены\n 2. Аффинный шифр\n 3. Аффинный рекуррентный шифр\n")
